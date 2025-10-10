@@ -16,13 +16,14 @@
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
     input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px}
-    .compact{max-width:260px}
     .results{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
     .result{flex:1 1 200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px}
     .small{font-size:12px;color:var(--muted)}
     button{background:var(--accent);border:none;color:#04233a;padding:8px 10px;border-radius:8px;cursor:pointer}
     .footer{margin-top:14px;font-size:13px;color:var(--muted)}
     .muted{color:var(--muted)}
+    .row-inline{display:flex;gap:8px;align-items:center}
+    .slider-value{min-width:40px;text-align:center}
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -34,7 +35,7 @@
     <div class="grid" style="margin-top:12px">
       <div>
         <label for="mcSens">Minecraft sens (from options.txt)</label>
-        <input id="mcSens" class="compact" inputmode="decimal" placeholder="e.g. 0.07446537" />
+        <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.07446537" />
       </div>
 
       <div>
@@ -43,21 +44,11 @@
       </div>
 
       <div>
-        <label for="winSens">Windows Sens (type slider value 1–11 OR type multiplier)</label>
-        <input id="winSens" class="compact" list="winsList" inputmode="decimal" placeholder="e.g. 3 or 0.125" />
-        <datalist id="winsList">
-          <option value="1"></option>
-          <option value="2"></option>
-          <option value="3"></option>
-          <option value="4"></option>
-          <option value="5"></option>
-          <option value="6"></option>
-          <option value="7"></option>
-          <option value="8"></option>
-          <option value="9"></option>
-          <option value="10"></option>
-          <option value="11"></option>
-        </datalist>
+        <label for="winSens">Windows Sens (1–20)</label>
+        <div class="row-inline">
+          <input id="winSens" type="range" min="1" max="20" value="3" />
+          <div class="slider-value small" id="winVal">3</div>
+        </div>
       </div>
 
       <div>
@@ -79,10 +70,6 @@
         <div id="cm360" style="font-size:20px;font-weight:600">—</div>
       </div>
       <div class="result">
-        <div class="small">degrees / count</div>
-        <div id="degpc" style="font-size:18px;font-weight:600">—</div>
-      </div>
-      <div class="result">
         <div class="small">Minecraft percent</div>
         <div id="mcPercent" style="font-size:18px;font-weight:600">—</div>
       </div>
@@ -94,8 +81,7 @@
 
     <div class="footer">
       <strong>Notes:</strong> The formulas implemented are:
-      <pre class="small muted" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px">degreesPerCount = ((mcSens * 0.6 + 0.2)^3) * 1.2
-in/360 = TRUNC(360 / (degreesPerCount * DPI), 2)
+      <pre class="small muted" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px">in/360 = TRUNC(360 / (degreesPerCount * DPI), 2)
 cm/360 = in/360 * 2.54
 mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
 cursor sens = (lookup multiplier for Windows Sens) * DPI
@@ -108,16 +94,15 @@ These formulas are made by r0hkx.</pre>
 function safeNum(v){ if (v===null || v===undefined) return NaN; const s = String(v).trim(); if (s==='') return NaN; return Number(s); }
 function truncTo(n, d){ if (!isFinite(n)) return NaN; const p = Math.pow(10, d); return Math.trunc(n * p) / p; }
 
-// lookup multipliers (1-based index so Windows Sens 1 -> lookup[1])
-const defaultLookup = [null, 0.10, 0.12, 0.125, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28];
+const defaultLookup = [null, 0.10, 0.12, 0.125, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.42, 0.44, 0.46];
 let lookup = defaultLookup.slice();
 
 const mcSensInput = document.getElementById('mcSens');
 const dpiInput = document.getElementById('dpi');
-const winInput = document.getElementById('winSens');
+const winRange = document.getElementById('winSens');
+const winVal = document.getElementById('winVal');
 const in360El = document.getElementById('in360');
 const cm360El = document.getElementById('cm360');
-const degpcEl = document.getElementById('degpc');
 const mcPercEl = document.getElementById('mcPercent');
 const cursorEl = document.getElementById('cursorSens');
 const copyBtn = document.getElementById('copyBtn');
@@ -126,56 +111,40 @@ const resetBtn = document.getElementById('resetBtn');
 function compute(){
   const mc = safeNum(mcSensInput.value);
   const dpi = safeNum(dpiInput.value);
-  const winRaw = winInput.value.trim();
+  const win = safeNum(winRange.value);
 
   if (!isFinite(mc) || !isFinite(dpi)){
-    in360El.textContent = '—'; cm360El.textContent = '—'; degpcEl.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
+    in360El.textContent = '—'; cm360El.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
     return;
   }
 
-  // degrees per count (per your formula)
   const degreesPerCount = Math.pow(mc * 0.6 + 0.2, 3) * 1.2;
   const countsPer360 = 360 / (degreesPerCount * dpi);
   const in360 = truncTo(countsPer360, 2);
   const cm360 = truncTo(countsPer360 * 2.54, 2);
 
-  degpcEl.textContent = (isFinite(degreesPerCount) ? (truncTo(degreesPerCount, 6)) : '—');
   in360El.textContent = isFinite(in360) ? in360.toFixed(2) : '—';
   cm360El.textContent = isFinite(cm360) ? cm360.toFixed(2) : '—';
   mcPercEl.textContent = (isFinite(mc) ? (Math.trunc((mc * 2) * 100) + '%') : '—');
 
-  // parse Windows Sens input: if it's an integer 1..11, use lookup multiplier; otherwise if it's a decimal use it as multiplier
   let multiplier = NaN;
-  const winNum = safeNum(winRaw);
-  if (isFinite(winNum) && Number.isInteger(winNum) && winNum >= 1 && winNum <= 11){
-    multiplier = lookup[winNum];
-  } else if (isFinite(winNum) && winNum > 0){
-    // treat as explicit multiplier (e.g. 0.125)
-    multiplier = winNum;
+  if (isFinite(win) && Number.isInteger(win) && win >=1 && win <= 20){
+    multiplier = lookup[win];
   }
-
   const cursorVal = isFinite(multiplier) && isFinite(dpi) ? truncTo(multiplier * dpi, 2) : NaN;
   cursorEl.textContent = isFinite(cursorVal) ? cursorVal.toFixed(2) : '—';
 }
 
 mcSensInput.addEventListener('input', compute);
 dpiInput.addEventListener('input', compute);
-winInput.addEventListener('input', compute);
+winRange.addEventListener('input', (e)=>{ winVal.textContent = e.target.value; compute(); });
 copyBtn.addEventListener('click', ()=>{
-  const text = `mcSens=${mcSensInput.value || ''}
-DPI=${dpiInput.value || ''}
-WindowsSens=${winInput.value || ''}
-in/360=${in360El.textContent}
-cm/360=${cm360El.textContent}
-degrees/count=${degpcEl.textContent}
-mc%=${mcPercEl.textContent}
-cursorSens=${cursorEl.textContent}`;
+  const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
   navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
 });
-resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winInput.value='3'; lookup = defaultLookup.slice(); compute(); });
+resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='3'; winVal.textContent='3'; lookup = defaultLookup.slice(); compute(); });
 
-// init
-winInput.value = '3'; mcSensInput.value='0.07446537'; dpiInput.value='3000'; compute();
+winRange.value = '3'; winVal.textContent='3'; mcSensInput.value='0.07446537'; dpiInput.value='3000'; compute();
 </script>
 </body>
 </html>
