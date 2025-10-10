@@ -5,19 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Minecraft 360 Calculator</title>
   <style>
-    main { position: relative; }
-
-    .footer-credit {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      font-size: 13px;
-      color: var(--muted);
-      opacity: 0.9;
-    }
-
-    .footer-credit strong { color: #60a5fa; }
-
     :root{--bg:#0f172a;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
     html, body {  height: 100%;  min-height: 100%;  margin: 0;  font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial;  background: linear-gradient(180deg,#020617 0%, #07102a 100%);  background-attachment: fixed;}
 
@@ -30,8 +17,10 @@
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
     input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px}
-    #mcSens { width: calc(100% - 20px); }
-    #dpi { width: calc(100% - 20px); }
+    #mcSens {
+  width: calc(100% - 20px);}
+    #dpi {
+  width: calc(100% - 20px);}
     .results{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
     .result{flex:1 1 200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px}
     .small{font-size:12px;color:var(--muted)}
@@ -40,15 +29,11 @@
     .muted{color:var(--muted)}
     .row-inline{display:flex;gap:8px;align-items:center}
     .slider-value{min-width:40px;text-align:center}
-    .share-range { margin-top:8px; display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); }
-    .share-range input[type="number"]{ width:64px; padding:6px 8px; }
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <main class="card" role="main">
-    <div class="footer-credit">By <strong>qMaxXen</strong></div>
-
     <h1>Minecraft 360 Calculator</h1>
     <p class="small">Enter your <strong>Minecraft sens</strong> (from <code>options.txt</code>), <strong>DPI</strong>, and <strong>Windows Sens</strong>. The page calculates <em>in/360</em> and <em>cm/360</em>.</p>
 
@@ -89,19 +74,6 @@
         <div class="small">cm / 360</div>
         <div id="cm360" style="font-size:20px;font-weight:600">—</div>
       </div>
-
-      <div class="result">
-        <div class="small">Shared by</div>
-        <div id="sharePct" style="font-size:16px;font-weight:600">—</div>
-
-        <div class="share-range">
-          <label for="shareRange" class="small">Range ±</label>
-          <input id="shareRange" type="number" min="0" max="100" step="1" value="10" />
-          <div class="small">%</div>
-        </div>
-      </div>
-      <!-- end shared-by -->
-
       <div class="result">
         <div class="small">Minecraft percent</div>
         <div id="mcPercent" style="font-size:18px;font-weight:600">—</div>
@@ -142,96 +114,6 @@ const cursorEl = document.getElementById('cursorSens');
 const copyBtn = document.getElementById('copyBtn');
 const resetBtn = document.getElementById('resetBtn');
 
-const shareEl = document.getElementById('sharePct');
-const shareRangeInput = document.getElementById('shareRange');
-
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1aa_ZRy1Dd3Fj4eEzPABY0hHEpCsQTZdYKWSwc7zaoVI/export?format=csv&gid=1272521431';
-let sheetDataPromise = null;
-
-function fetchSheetCm360() {
-  if (sheetDataPromise) return sheetDataPromise;
-
-  sheetDataPromise = fetch(SHEET_CSV_URL)
-    .then(resp => {
-      if (!resp.ok) throw new Error('Network error');
-      return resp.text();
-    })
-    .then(csv => {
-      const lines = csv.split(/\r?\n/);
-      if (lines.length === 0) return [];
-
-      let headerLineIndex = 0;
-      while (headerLineIndex < lines.length && lines[headerLineIndex].trim() === '') headerLineIndex++;
-      if (headerLineIndex >= lines.length) return [];
-
-      const headers = lines[headerLineIndex].split(',').map(h => h.trim().toLowerCase());
-      let idx = headers.findIndex(h => h === 'cm/360' || h === 'cm360' || /cm\s*\/?\s*360/.test(h));
-      if (idx === -1) {
-        idx = headers.findIndex(h => h.includes('cm') && h.includes('360'));
-      }
-      if (idx === -1) return [];
-
-      const values = [];
-      for (let i = headerLineIndex + 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line === '') continue;
-        const cols = line.split(',');
-        if (cols.length <= idx) continue;
-        const raw = cols[idx].trim();
-        if (raw === '') continue;
-        const normalized = raw.replace(',', '.');
-        const num = Number(normalized);
-        if (!Number.isNaN(num)) values.push(num);
-      }
-      return values;
-    })
-    .catch(err => {
-      console.warn('Sheet fetch/parse error:', err);
-      return null;
-    });
-
-  return sheetDataPromise;
-}
-
-function round2(n){ return Math.round(n * 100) / 100; }
-
-function updateSharePercentage(cm360Value, rangePercent = 10){
-  if (!isFinite(cm360Value)) {
-    shareEl.textContent = '—';
-    return;
-  }
-
-  fetchSheetCm360().then(data => {
-    if (data === null) {
-      shareEl.textContent = 'Data unavailable';
-      return;
-    }
-    if (!data || data.length === 0) {
-      shareEl.textContent = 'No data';
-      return;
-    }
-
-    const target = round2(cm360Value);
-
-    const lower = target * (1 - rangePercent / 100);
-    const upper = target * (1 + rangePercent / 100);
-
-    const finalLower = (target === 0) ? target - 0.01 : lower;
-    const finalUpper = (target === 0) ? target + 0.01 : upper;
-
-    let matches = 0;
-    for (const v of data) {
-      if (!isFinite(v)) continue;
-      if (v >= finalLower && v <= finalUpper) matches++;
-    }
-
-    const total = data.length;
-    const pct = (matches / total) * 100;
-    const pctText = pct >= 1 ? Math.round(pct) + '%' : pct.toFixed(1) + '%';
-    shareEl.textContent = `${pctText} of players share the same cm/360 (±${rangePercent}%)`;
-  });
-}
-
 function compute(){
   const mc = safeNum(mcSensInput.value);
   const dpi = safeNum(dpiInput.value);
@@ -239,7 +121,6 @@ function compute(){
 
   if (!isFinite(mc) || !isFinite(dpi)){
     in360El.textContent = '—'; cm360El.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
-    shareEl.textContent = '—';
     return;
   }
 
@@ -258,29 +139,11 @@ function compute(){
   }
   const cursorVal = isFinite(multiplier) && isFinite(dpi) ? truncTo(multiplier * dpi, 2) : NaN;
   cursorEl.textContent = isFinite(cursorVal) ? cursorVal.toFixed(2) : '—';
-
-  const rangePercent = safeNum(shareRangeInput.value);
-  if (isFinite(cm360)) {
-    updateSharePercentage(cm360, (isFinite(rangePercent) ? rangePercent : 10));
-  } else {
-    shareEl.textContent = '—';
-  }
 }
 
 mcSensInput.addEventListener('input', compute);
 dpiInput.addEventListener('input', compute);
 winRange.addEventListener('input', (e)=>{ winVal.textContent = e.target.value; compute(); });
-shareRangeInput.addEventListener('input', () => {
-  const cmText = cm360El.textContent;
-  const cm = safeNum(cmText);
-  const rangePercent = safeNum(shareRangeInput.value);
-  if (!isFinite(cm)) {
-    shareEl.textContent = '—';
-    return;
-  }
-  updateSharePercentage(cm, (isFinite(rangePercent) ? rangePercent : 10));
-});
-
 copyBtn.addEventListener('click', ()=>{
   const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
   navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
@@ -290,4 +153,3 @@ resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''
 winRange.value = '10'; winVal.textContent='10'; mcSensInput.value=''; dpiInput.value=''; compute();
 </script>
 </body>
-</html>
