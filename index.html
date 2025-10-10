@@ -92,13 +92,10 @@ mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
 cursor sens = (lookup multiplier for Windows Sens) * DPI
 
 These formulas are made by r0hkx.</pre>
-      <div style="margin-top:12px;display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:13px;color:var(--muted)">
-        <span>By <strong style="color:#60a5fa">qMaxXen</strong></span>
-        <img id="discordCopy" src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg"
-             alt="Discord" width="18" height="18"
-             style="cursor:pointer;filter:invert(70%);opacity:0.8;transition:0.2s ease"/>
-      </div>
 
+      <div style="margin-top:12px;text-align:right;font-size:13px;color:var(--muted)">
+        By <strong style="color:#60a5fa">qMaxXen</strong>
+      </div>
     </div>
   </main>
 
@@ -119,8 +116,6 @@ const mcPercEl = document.getElementById('mcPercent');
 const cursorEl = document.getElementById('cursorSens');
 const copyBtn = document.getElementById('copyBtn');
 const resetBtn = document.getElementById('resetBtn');
-const discordBtn = document.getElementById('discordCopy');
-
 
 function compute(){
   const mc = safeNum(mcSensInput.value);
@@ -159,13 +154,5 @@ copyBtn.addEventListener('click', ()=>{
 resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent='10'; lookup = defaultLookup.slice(); compute(); });
 
 winRange.value = '10'; winVal.textContent='10'; mcSensInput.value=''; dpiInput.value=''; compute();
-discordBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText('qMaxXen').then(() => {
-    discordBtn.style.filter = 'invert(70%) sepia(1) saturate(3) hue-rotate(180deg)';
-    setTimeout(() => discordBtn.style.filter = 'invert(70%)', 500);
-  });
-});
-
 </script>
 </body>
-</html>
