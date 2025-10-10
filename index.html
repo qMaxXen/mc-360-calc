@@ -16,6 +16,7 @@
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
     input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px}
+    .compact{max-width:260px}
     .results{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
     .result{flex:1 1 200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px}
     .small{font-size:12px;color:var(--muted)}
@@ -27,23 +28,36 @@
 </head>
 <body>
   <main class="card" role="main">
-    <h1>Minecraft DPI / cm360 Calculator</h1>
+    <h1>Minecraft 360 Calculator</h1>
     <p class="small">Enter your <strong>Minecraft sens</strong> (from <code>options.txt</code>), <strong>DPI</strong>, and <strong>Windows Sens</strong>. The page calculates <em>in/360</em> and <em>cm/360</em>.</p>
 
     <div class="grid" style="margin-top:12px">
       <div>
         <label for="mcSens">Minecraft sens (from options.txt)</label>
-        <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
+        <input id="mcSens" class="compact" inputmode="decimal" placeholder="e.g. 0.07446537" />
       </div>
 
       <div>
         <label for="dpi">DPI</label>
-        <input id="dpi" inputmode="numeric" placeholder="e.g. 800" />
+        <input id="dpi" inputmode="numeric" placeholder="e.g. 3000" />
       </div>
 
       <div>
-        <label for="winSens">Windows Sens (slider value or custom)</label>
-        <select id="winSens"></select>
+        <label for="winSens">Windows Sens (type slider value 1–11 OR type multiplier)</label>
+        <input id="winSens" class="compact" list="winsList" inputmode="decimal" placeholder="e.g. 3 or 0.125" />
+        <datalist id="winsList">
+          <option value="1"></option>
+          <option value="2"></option>
+          <option value="3"></option>
+          <option value="4"></option>
+          <option value="5"></option>
+          <option value="6"></option>
+          <option value="7"></option>
+          <option value="8"></option>
+          <option value="9"></option>
+          <option value="10"></option>
+          <option value="11"></option>
+        </datalist>
       </div>
 
       <div>
@@ -73,7 +87,7 @@
         <div id="mcPercent" style="font-size:18px;font-weight:600">—</div>
       </div>
       <div class="result">
-        <div class="small">Cursor sensitivity (lookup × DPI)</div>
+        <div class="small">Cursor sensitivity</div>
         <div id="cursorSens" style="font-size:16px;font-weight:600">—</div>
       </div>
     </div>
@@ -94,12 +108,13 @@ These formulas are made by r0hkx.</pre>
 function safeNum(v){ if (v===null || v===undefined) return NaN; const s = String(v).trim(); if (s==='') return NaN; return Number(s); }
 function truncTo(n, d){ if (!isFinite(n)) return NaN; const p = Math.pow(10, d); return Math.trunc(n * p) / p; }
 
-const defaultLookup = [null, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30];
+// lookup multipliers (1-based index so Windows Sens 1 -> lookup[1])
+const defaultLookup = [null, 0.10, 0.12, 0.125, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28];
 let lookup = defaultLookup.slice();
 
 const mcSensInput = document.getElementById('mcSens');
 const dpiInput = document.getElementById('dpi');
-const winSelect = document.getElementById('winSens');
+const winInput = document.getElementById('winSens');
 const in360El = document.getElementById('in360');
 const cm360El = document.getElementById('cm360');
 const degpcEl = document.getElementById('degpc');
@@ -108,26 +123,17 @@ const cursorEl = document.getElementById('cursorSens');
 const copyBtn = document.getElementById('copyBtn');
 const resetBtn = document.getElementById('resetBtn');
 
-function populateWinSelect(){
-  winSelect.innerHTML = '';
-  for(let i=1;i<=11;i++){
-    const opt = document.createElement('option'); opt.value = String(i); opt.textContent = String(i);
-    winSelect.appendChild(opt);
-  }
-  const custom = document.createElement('option'); custom.value = 'custom'; custom.textContent = 'Custom multiplier...';
-  winSelect.appendChild(custom);
-}
-
 function compute(){
   const mc = safeNum(mcSensInput.value);
   const dpi = safeNum(dpiInput.value);
-  const win = winSelect.value;
+  const winRaw = winInput.value.trim();
 
   if (!isFinite(mc) || !isFinite(dpi)){
     in360El.textContent = '—'; cm360El.textContent = '—'; degpcEl.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
     return;
   }
 
+  // degrees per count (per your formula)
   const degreesPerCount = Math.pow(mc * 0.6 + 0.2, 3) * 1.2;
   const countsPer360 = 360 / (degreesPerCount * dpi);
   const in360 = truncTo(countsPer360, 2);
@@ -138,24 +144,27 @@ function compute(){
   cm360El.textContent = isFinite(cm360) ? cm360.toFixed(2) : '—';
   mcPercEl.textContent = (isFinite(mc) ? (Math.trunc((mc * 2) * 100) + '%') : '—');
 
+  // parse Windows Sens input: if it's an integer 1..11, use lookup multiplier; otherwise if it's a decimal use it as multiplier
   let multiplier = NaN;
-  if (win === 'custom'){
-    multiplier = NaN; 
-  } else {
-    const idx = Number(win);
-    multiplier = lookup[idx];
+  const winNum = safeNum(winRaw);
+  if (isFinite(winNum) && Number.isInteger(winNum) && winNum >= 1 && winNum <= 11){
+    multiplier = lookup[winNum];
+  } else if (isFinite(winNum) && winNum > 0){
+    // treat as explicit multiplier (e.g. 0.125)
+    multiplier = winNum;
   }
+
   const cursorVal = isFinite(multiplier) && isFinite(dpi) ? truncTo(multiplier * dpi, 2) : NaN;
   cursorEl.textContent = isFinite(cursorVal) ? cursorVal.toFixed(2) : '—';
 }
 
 mcSensInput.addEventListener('input', compute);
 dpiInput.addEventListener('input', compute);
-winSelect.addEventListener('change', compute);
+winInput.addEventListener('input', compute);
 copyBtn.addEventListener('click', ()=>{
   const text = `mcSens=${mcSensInput.value || ''}
 DPI=${dpiInput.value || ''}
-WindowsSens=${winSelect.value}
+WindowsSens=${winInput.value || ''}
 in/360=${in360El.textContent}
 cm/360=${cm360El.textContent}
 degrees/count=${degpcEl.textContent}
@@ -163,9 +172,10 @@ mc%=${mcPercEl.textContent}
 cursorSens=${cursorEl.textContent}`;
   navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
 });
-resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winSelect.value='6'; lookup = defaultLookup.slice(); compute(); });
+resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winInput.value='3'; lookup = defaultLookup.slice(); compute(); });
 
-populateWinSelect(); winSelect.value='6'; mcSensInput.value='0.5'; dpiInput.value='800'; compute();
+// init
+winInput.value = '3'; mcSensInput.value='0.07446537'; dpiInput.value='3000'; compute();
 </script>
 </body>
 </html>
