@@ -40,18 +40,18 @@
     <div class="grid" style="margin-top:12px">
       <div>
         <label for="mcSens">Minecraft sens (from options.txt)</label>
-        <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.07446537" />
+        <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
       </div>
 
       <div>
         <label for="dpi">DPI</label>
-        <input id="dpi" inputmode="numeric" placeholder="e.g. 3000" />
+        <input id="dpi" inputmode="numeric" placeholder="e.g. 1000" />
       </div>
 
       <div>
         <label for="winSens">Windows Sens (1–20)</label>
         <div class="row-inline">
-          <input id="winSens" type="range" min="1" max="20" value="3" />
+          <input id="winSens" type="range" min="1" max="20" value="10" />
           <div class="slider-value small" id="winVal">3</div>
         </div>
       </div>
@@ -86,12 +86,15 @@
 
     <div class="footer">
       <strong>Notes:</strong> The formulas implemented are:
-      <pre class="small muted" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px">in/360 = TRUNC(360 / (degreesPerCount * DPI), 2)
-cm/360 = in/360 * 2.54
-mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
-cursor sens = (lookup multiplier for Windows Sens) * DPI
+      <pre class="small muted" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;">
+      in/360 = TRUNC(360 / (degreesPerCount * DPI), 2)
+      cm/360 = in/360 * 2.54
+      mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
+      cursor sens = (lookup multiplier for Windows Sens) * DPI
+      
+      These formulas are made by r0hkx.
+      </pre>
 
-These formulas are made by r0hkx.</pre>
     </div>
   </main>
 
