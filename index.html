@@ -148,7 +148,7 @@ copyBtn.addEventListener('click', ()=>{
   const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
   navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
 });
-resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='3'; winVal.textContent='3'; lookup = defaultLookup.slice(); compute(); });
+resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent='10'; lookup = defaultLookup.slice(); compute(); });
 
 winRange.value = '3'; winVal.textContent='3'; mcSensInput.value='0.07446537'; dpiInput.value='3000'; compute();
 </script>
