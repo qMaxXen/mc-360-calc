@@ -6,13 +6,25 @@
   <title>Minecraft 360 Calculator</title>
   <style>
     main { position: relative; }
-    .footer-credit { position: absolute; top: 10px; right: 14px; font-size: 13px; color: var(--muted); opacity: 0.9; }
+
+    .footer-credit {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      opacity: 0.9;
+    }
+
     .footer-credit strong { color: #60a5fa; }
+
     :root{--bg:#0f172a;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
-    html, body { height: 100%; min-height: 100%; margin: 0; font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg,#020617 0%, #07102a 100%); background-attachment: fixed; }
+    html, body {  height: 100%;  min-height: 100%;  margin: 0;  font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial;  background: linear-gradient(180deg,#020617 0%, #07102a 100%);  background-attachment: fixed;}
+
     body{background:linear-gradient(180deg,#020617 0%, #07102a 100%);color:#e6eef8;display:flex;align-items:flex-start;justify-content:center;padding:28px;overflow:auto}
     html, body { scrollbar-width: none; -ms-overflow-style: none; }
     body::-webkit-scrollbar { display: none; }
+
     .card{background:var(--card);border-radius:12px;padding:20px;width:820px;max-width:96%;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
     h1{margin:0 0 10px;font-size:20px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -28,6 +40,8 @@
     .muted{color:var(--muted)}
     .row-inline{display:flex;gap:8px;align-items:center}
     .slider-value{min-width:40px;text-align:center}
+    .share-range { margin-top:8px; display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); }
+    .share-range input[type="number"]{ width:64px; padding:6px 8px; }
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -79,7 +93,14 @@
       <div class="result">
         <div class="small">Shared by</div>
         <div id="sharePct" style="font-size:16px;font-weight:600">—</div>
+
+        <div class="share-range">
+          <label for="shareRange" class="small">Range ±</label>
+          <input id="shareRange" type="number" min="0" max="100" step="1" value="10" />
+          <div class="small">%</div>
+        </div>
       </div>
+      <!-- end shared-by -->
 
       <div class="result">
         <div class="small">Minecraft percent</div>
@@ -97,116 +118,176 @@
 cm/360 = in/360 * 2.54
 mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
 cursor sens = (lookup multiplier for Windows Sens) * DPI
+
 These formulas are made by r0hkx.</pre>
+
     </div>
   </main>
 
 <script>
-function safeNum(v){ if (v===null||v===undefined)return NaN; const s=String(v).trim(); if(s==='')return NaN; return Number(s); }
-function truncTo(n,d){ if(!isFinite(n))return NaN; const p=Math.pow(10,d); return Math.trunc(n*p)/p; }
+function safeNum(v){ if (v===null || v===undefined) return NaN; const s = String(v).trim(); if (s==='') return NaN; return Number(s); }
+function truncTo(n, d){ if (!isFinite(n)) return NaN; const p = Math.pow(10, d); return Math.trunc(n * p) / p; }
 
-const defaultLookup=[null,0.10,0.12,0.125,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28,0.30,0.32,0.34,0.36,0.38,0.40,0.42,0.44,0.46];
-let lookup=defaultLookup.slice();
+const defaultLookup = [null, 0.10, 0.12, 0.125, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.42, 0.44, 0.46];
+let lookup = defaultLookup.slice();
 
-const mcSensInput=document.getElementById('mcSens');
-const dpiInput=document.getElementById('dpi');
-const winRange=document.getElementById('winSens');
-const winVal=document.getElementById('winVal');
-const in360El=document.getElementById('in360');
-const cm360El=document.getElementById('cm360');
-const mcPercEl=document.getElementById('mcPercent');
-const cursorEl=document.getElementById('cursorSens');
-const copyBtn=document.getElementById('copyBtn');
-const resetBtn=document.getElementById('resetBtn');
-const shareEl=document.getElementById('sharePct');
+const mcSensInput = document.getElementById('mcSens');
+const dpiInput = document.getElementById('dpi');
+const winRange = document.getElementById('winSens');
+const winVal = document.getElementById('winVal');
+const in360El = document.getElementById('in360');
+const cm360El = document.getElementById('cm360');
+const mcPercEl = document.getElementById('mcPercent');
+const cursorEl = document.getElementById('cursorSens');
+const copyBtn = document.getElementById('copyBtn');
+const resetBtn = document.getElementById('resetBtn');
 
-const SHEET_CSV_URL='https://docs.google.com/spreadsheets/d/1aa_ZRy1Dd3Fj4eEzPABY0hHEpCsQTZdYKWSwc7zaoVI/export?format=csv&gid=1272521431';
-let sheetDataPromise=null;
+const shareEl = document.getElementById('sharePct');
+const shareRangeInput = document.getElementById('shareRange');
 
-function fetchSheetCm360(){
-  if(sheetDataPromise)return sheetDataPromise;
-  sheetDataPromise=fetch(SHEET_CSV_URL).then(r=>{if(!r.ok)throw new Error('Network error'); return r.text();}).then(csv=>{
-    const lines=csv.split(/\r?\n/);
-    if(lines.length===0)return[];
-    let headerLineIndex=0;
-    while(headerLineIndex<lines.length&&lines[headerLineIndex].trim()==='')headerLineIndex++;
-    if(headerLineIndex>=lines.length)return[];
-    const headers=lines[headerLineIndex].split(',').map(h=>h.trim().toLowerCase());
-    let idx=headers.findIndex(h=>h==='cm/360'||h==='cm360'||/cm\s*\/?\s*360/.test(h));
-    if(idx===-1)idx=headers.findIndex(h=>h.includes('cm')&&h.includes('360'));
-    if(idx===-1)return[];
-    const values=[];
-    for(let i=headerLineIndex+1;i<lines.length;i++){
-      const line=lines[i].trim();
-      if(line==='')continue;
-      const cols=line.split(',');
-      if(cols.length<=idx)continue;
-      const raw=cols[idx].trim();
-      if(raw==='')continue;
-      const normalized=raw.replace(',','.');
-      const num=Number(normalized);
-      if(!Number.isNaN(num))values.push(num);
-    }
-    return values;
-  }).catch(e=>{console.warn('Sheet fetch/parse error:',e); return null;});
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1aa_ZRy1Dd3Fj4eEzPABY0hHEpCsQTZdYKWSwc7zaoVI/export?format=csv&gid=1272521431';
+let sheetDataPromise = null;
+
+function fetchSheetCm360() {
+  if (sheetDataPromise) return sheetDataPromise;
+
+  sheetDataPromise = fetch(SHEET_CSV_URL)
+    .then(resp => {
+      if (!resp.ok) throw new Error('Network error');
+      return resp.text();
+    })
+    .then(csv => {
+      const lines = csv.split(/\r?\n/);
+      if (lines.length === 0) return [];
+
+      let headerLineIndex = 0;
+      while (headerLineIndex < lines.length && lines[headerLineIndex].trim() === '') headerLineIndex++;
+      if (headerLineIndex >= lines.length) return [];
+
+      const headers = lines[headerLineIndex].split(',').map(h => h.trim().toLowerCase());
+      let idx = headers.findIndex(h => h === 'cm/360' || h === 'cm360' || /cm\s*\/?\s*360/.test(h));
+      if (idx === -1) {
+        idx = headers.findIndex(h => h.includes('cm') && h.includes('360'));
+      }
+      if (idx === -1) return [];
+
+      const values = [];
+      for (let i = headerLineIndex + 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line === '') continue;
+        const cols = line.split(',');
+        if (cols.length <= idx) continue;
+        const raw = cols[idx].trim();
+        if (raw === '') continue;
+        const normalized = raw.replace(',', '.');
+        const num = Number(normalized);
+        if (!Number.isNaN(num)) values.push(num);
+      }
+      return values;
+    })
+    .catch(err => {
+      console.warn('Sheet fetch/parse error:', err);
+      return null;
+    });
+
   return sheetDataPromise;
 }
 
-function round2(n){ return Math.round(n*100)/100; }
+function round2(n){ return Math.round(n * 100) / 100; }
 
-function updateSharePercentage(cm360Value){
-  if(!isFinite(cm360Value)){ shareEl.textContent='—'; return; }
-  fetchSheetCm360().then(data=>{
-    if(data===null){ shareEl.textContent='Data unavailable'; return; }
-    if(!data||data.length===0){ shareEl.textContent='No data'; return; }
-    const target=round2(cm360Value);
-    let matches=0;
-    for(const v of data){ if(isFinite(v)&&round2(v)===target)matches++; }
-    const total=data.length;
-    const pct=(matches/total)*100;
-    const pctText=pct>=1?Math.round(pct)+'%':pct.toFixed(1)+'%';
-    shareEl.textContent=`${pctText} of players share the same cm/360`;
+function updateSharePercentage(cm360Value, rangePercent = 10){
+  if (!isFinite(cm360Value)) {
+    shareEl.textContent = '—';
+    return;
+  }
+
+  fetchSheetCm360().then(data => {
+    if (data === null) {
+      shareEl.textContent = 'Data unavailable';
+      return;
+    }
+    if (!data || data.length === 0) {
+      shareEl.textContent = 'No data';
+      return;
+    }
+
+    const target = round2(cm360Value);
+
+    const lower = target * (1 - rangePercent / 100);
+    const upper = target * (1 + rangePercent / 100);
+
+    const finalLower = (target === 0) ? target - 0.01 : lower;
+    const finalUpper = (target === 0) ? target + 0.01 : upper;
+
+    let matches = 0;
+    for (const v of data) {
+      if (!isFinite(v)) continue;
+      if (v >= finalLower && v <= finalUpper) matches++;
+    }
+
+    const total = data.length;
+    const pct = (matches / total) * 100;
+    const pctText = pct >= 1 ? Math.round(pct) + '%' : pct.toFixed(1) + '%';
+    shareEl.textContent = `${pctText} of players share the same cm/360 (±${rangePercent}%)`;
   });
 }
 
 function compute(){
-  const mc=safeNum(mcSensInput.value);
-  const dpi=safeNum(dpiInput.value);
-  const win=safeNum(winRange.value);
+  const mc = safeNum(mcSensInput.value);
+  const dpi = safeNum(dpiInput.value);
+  const win = safeNum(winRange.value);
 
-  if(!isFinite(mc)||!isFinite(dpi)){
-    in360El.textContent='—'; cm360El.textContent='—'; mcPercEl.textContent='—'; cursorEl.textContent='—'; shareEl.textContent='—';
+  if (!isFinite(mc) || !isFinite(dpi)){
+    in360El.textContent = '—'; cm360El.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
+    shareEl.textContent = '—';
     return;
   }
 
-  const degreesPerCount=Math.pow(mc*0.6+0.2,3)*1.2;
-  const countsPer360=360/(degreesPerCount*dpi);
-  const in360=truncTo(countsPer360,2);
-  const cm360=truncTo(countsPer360*2.54,2);
+  const degreesPerCount = Math.pow(mc * 0.6 + 0.2, 3) * 1.2;
+  const countsPer360 = 360 / (degreesPerCount * dpi);
+  const in360 = truncTo(countsPer360, 2);
+  const cm360 = truncTo(countsPer360 * 2.54, 2);
 
-  in360El.textContent=isFinite(in360)?in360.toFixed(2):'—';
-  cm360El.textContent=isFinite(cm360)?cm360.toFixed(2):'—';
-  mcPercEl.textContent=isFinite(mc)?(Math.trunc((mc*2)*100)+'%'):'—';
+  in360El.textContent = isFinite(in360) ? in360.toFixed(2) : '—';
+  cm360El.textContent = isFinite(cm360) ? cm360.toFixed(2) : '—';
+  mcPercEl.textContent = (isFinite(mc) ? (Math.trunc((mc * 2) * 100) + '%') : '—');
 
-  let multiplier=NaN;
-  if(isFinite(win)&&Number.isInteger(win)&&win>=1&&win<=20)multiplier=lookup[win];
-  const cursorVal=isFinite(multiplier)&&isFinite(dpi)?truncTo(multiplier*dpi,2):NaN;
-  cursorEl.textContent=isFinite(cursorVal)?cursorVal.toFixed(2):'—';
+  let multiplier = NaN;
+  if (isFinite(win) && Number.isInteger(win) && win >=1 && win <= 20){
+    multiplier = lookup[win];
+  }
+  const cursorVal = isFinite(multiplier) && isFinite(dpi) ? truncTo(multiplier * dpi, 2) : NaN;
+  cursorEl.textContent = isFinite(cursorVal) ? cursorVal.toFixed(2) : '—';
 
-  if(isFinite(cm360))updateSharePercentage(cm360);
-  else shareEl.textContent='—';
+  const rangePercent = safeNum(shareRangeInput.value);
+  if (isFinite(cm360)) {
+    updateSharePercentage(cm360, (isFinite(rangePercent) ? rangePercent : 10));
+  } else {
+    shareEl.textContent = '—';
+  }
 }
 
-mcSensInput.addEventListener('input',compute);
-dpiInput.addEventListener('input',compute);
-winRange.addEventListener('input',e=>{ winVal.textContent=e.target.value; compute(); });
-copyBtn.addEventListener('click',()=>{
-  const text=`mcSens=${mcSensInput.value||''}\nDPI=${dpiInput.value||''}\nWindowsSens=${winRange.value||''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
-  navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
+mcSensInput.addEventListener('input', compute);
+dpiInput.addEventListener('input', compute);
+winRange.addEventListener('input', (e)=>{ winVal.textContent = e.target.value; compute(); });
+shareRangeInput.addEventListener('input', () => {
+  const cmText = cm360El.textContent;
+  const cm = safeNum(cmText);
+  const rangePercent = safeNum(shareRangeInput.value);
+  if (!isFinite(cm)) {
+    shareEl.textContent = '—';
+    return;
+  }
+  updateSharePercentage(cm, (isFinite(rangePercent) ? rangePercent : 10));
 });
-resetBtn.addEventListener('click',()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent='10'; lookup=defaultLookup.slice(); compute(); });
 
-winRange.value='10'; winVal.textContent='10'; mcSensInput.value=''; dpiInput.value=''; compute();
+copyBtn.addEventListener('click', ()=>{
+  const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
+  navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
+});
+resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent='10'; lookup = defaultLookup.slice(); compute(); });
+
+winRange.value = '10'; winVal.textContent='10'; mcSensInput.value=''; dpiInput.value=''; compute();
 </script>
 </body>
 </html>
