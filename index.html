@@ -12,15 +12,13 @@
     html, body { scrollbar-width: none; -ms-overflow-style: none; }
     body::-webkit-scrollbar { display: none; }
 
-    .card{background:var(--card);border-radius:12px;padding:20px;width:820px;max-width:96%;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+    .card{background:var(--card);border-radius:12px;padding:20px;width:820px;max-width:96%;box-shadow:0 6px 30px rgba(2,6,23,0.6); position: relative;}
     h1{margin:0 0 10px;font-size:20px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
     input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px}
-    #mcSens {
-  width: calc(100% - 20px);}
-    #dpi {
-  width: calc(100% - 20px);}
+    #mcSens { width: calc(100% - 20px); }
+    #dpi { width: calc(100% - 20px); }
     .results{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
     .result{flex:1 1 200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px}
     .small{font-size:12px;color:var(--muted)}
@@ -70,14 +68,22 @@
         <div class="small">in / 360</div>
         <div id="in360" style="font-size:20px;font-weight:600">—</div>
       </div>
+
       <div class="result">
         <div class="small">cm / 360</div>
         <div id="cm360" style="font-size:20px;font-weight:600">—</div>
       </div>
+
       <div class="result">
         <div class="small">Minecraft percent</div>
         <div id="mcPercent" style="font-size:18px;font-weight:600">—</div>
       </div>
+
+      <div class="result">
+        <div class="small">Degrees / count</div>
+        <div id="degPerCount" style="font-size:16px;font-weight:600">—</div>
+      </div>
+
       <div class="result">
         <div class="small">Cursor sensitivity</div>
         <div id="cursorSens" style="font-size:16px;font-weight:600">—</div>
@@ -89,10 +95,10 @@
       <pre class="small muted" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px">in/360 = TRUNC(360 / (degreesPerCount * DPI), 2)
 cm/360 = in/360 * 2.54
 mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
+degreesPerCount = (mcSens * 0.6 + 0.2)^3 * 1.2
 cursor sens = (lookup multiplier for Windows Sens) * DPI
 
 These formulas are made by r0hkx.</pre>
-
     </div>
   </main>
 
@@ -100,7 +106,29 @@ These formulas are made by r0hkx.</pre>
 function safeNum(v){ if (v===null || v===undefined) return NaN; const s = String(v).trim(); if (s==='') return NaN; return Number(s); }
 function truncTo(n, d){ if (!isFinite(n)) return NaN; const p = Math.pow(10, d); return Math.trunc(n * p) / p; }
 
-const defaultLookup = [null, 0.10, 0.12, 0.125, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.42, 0.44, 0.46];
+const defaultLookup = [
+  null,
+  0.03125, // 1
+  0.0625,  // 2
+  0.125,   // 3
+  0.25,    // 4
+  0.375,   // 5
+  0.5,     // 6
+  0.625,   // 7
+  0.75,    // 8
+  0.875,   // 9
+  1,       // 10
+  1.25,    // 11
+  1.5,     // 12
+  1.75,    // 13
+  2,       // 14
+  2.25,    // 15
+  2.5,     // 16
+  2.75,    // 17
+  3,       // 18
+  3.25,    // 19
+  3.5      // 20
+];
 let lookup = defaultLookup.slice();
 
 const mcSensInput = document.getElementById('mcSens');
@@ -109,6 +137,7 @@ const winRange = document.getElementById('winSens');
 const winVal = document.getElementById('winVal');
 const in360El = document.getElementById('in360');
 const cm360El = document.getElementById('cm360');
+const degPerCountEl = document.getElementById('degPerCount');
 const mcPercEl = document.getElementById('mcPercent');
 const cursorEl = document.getElementById('cursorSens');
 const copyBtn = document.getElementById('copyBtn');
@@ -120,7 +149,7 @@ function compute(){
   const win = safeNum(winRange.value);
 
   if (!isFinite(mc) || !isFinite(dpi)){
-    in360El.textContent = '—'; cm360El.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
+    in360El.textContent = '—'; cm360El.textContent = '—'; degPerCountEl.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
     return;
   }
 
@@ -131,25 +160,30 @@ function compute(){
 
   in360El.textContent = isFinite(in360) ? in360.toFixed(2) : '—';
   cm360El.textContent = isFinite(cm360) ? cm360.toFixed(2) : '—';
+  degPerCountEl.textContent = isFinite(degreesPerCount) ? truncTo(degreesPerCount, 6).toFixed(6) : '—';
+
   mcPercEl.textContent = (isFinite(mc) ? (Math.trunc((mc * 2) * 100) + '%') : '—');
 
   let multiplier = NaN;
-  if (isFinite(win) && Number.isInteger(win) && win >=1 && win <= 20){
+  if (isFinite(win) && Number.isInteger(win) && win >= 1 && win <= 20){
     multiplier = lookup[win];
   }
-  const cursorVal = isFinite(multiplier) && isFinite(dpi) ? truncTo(multiplier * dpi, 2) : NaN;
-  cursorEl.textContent = isFinite(cursorVal) ? cursorVal.toFixed(2) : '—';
+  const cursorVal = isFinite(multiplier) && isFinite(dpi) ? multiplier * dpi : NaN;
+  cursorEl.textContent = isFinite(cursorVal) ? Math.round(cursorVal).toString() : '—';
 }
 
 mcSensInput.addEventListener('input', compute);
 dpiInput.addEventListener('input', compute);
 winRange.addEventListener('input', (e)=>{ winVal.textContent = e.target.value; compute(); });
+
 copyBtn.addEventListener('click', ()=>{
-  const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
+  const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\ndegreesPerCount=${degPerCountEl.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
   navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
 });
+
 resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent='10'; lookup = defaultLookup.slice(); compute(); });
 
-winRange.value = '10'; winVal.textContent='10'; mcSensInput.value=''; dpiInput.value=''; compute();
+winRange.value = '10'; winVal.textContent='10'; mcSensInput.value='0.315'; dpiInput.value='1800'; compute();
 </script>
 </body>
+</html>
