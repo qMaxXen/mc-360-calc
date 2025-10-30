@@ -23,11 +23,79 @@
     .results{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
     .result{flex:1 1 200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px}
     .small{font-size:12px;color:var(--muted)}
-    button{background:var(--accent);border:none;color:#04233a;padding:8px 10px;border-radius:8px;cursor:pointer}
+
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      line-height: 1;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      color: inherit;                      
+      background-color: rgba(255,255,255,0.02); 
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: none;                   
+      transition: none;                  
+    }
+
+    .btn-primary {
+      background-color: rgba(96,165,250,0.08);   
+      border-color: rgba(96,165,250,0.10);
+      color: inherit;
+    }
+
+
+    .btn-primary:hover {
+      background-color: rgba(96,165,250,0.12);     
+      border-color: rgba(96,165,250,0.14);
+    }
+
+    .btn-danger {
+      background-color: rgba(239,68,68,0.08);   
+      border-color: rgba(239,68,68,0.10);
+      color: inherit;
+    }
+
+    .btn-danger:hover {
+      background-color: rgba(239,68,68,0.14);
+      border-color: rgba(239,68,68,0.16);
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: inherit;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    button:focus-visible {
+      outline: 2px solid rgba(96,165,250,0.12);
+      outline-offset: 2px;
+      border-radius: 10px;
+    }
+
+    button[disabled] { opacity: .6; cursor: not-allowed; }
+
+    .grid > div > .row-inline button, .grid > div > div[style] > button {
+      min-width: 96px;
+      justify-content: center;
+    }
+
     .footer{margin-top:14px;font-size:13px;color:var(--muted)}
     .muted{color:var(--muted)}
     .row-inline{display:flex;gap:8px;align-items:center}
-    .slider-value{min-width:40px;text-align:center}
+    .slider-value{
+      min-width:40px;
+      text-align:center;
+      padding:4px 8px;                        
+      border-radius:6px;                      
+      background:rgba(255,255,255,0.04);      
+      border:1px solid rgba(255,255,255,0.03);
+      font-weight:600;
+    }
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -58,8 +126,8 @@
       <div>
         <label>&nbsp;</label>
         <div style="display:flex;gap:8px">
-          <button id="copyBtn">Copy results</button>
-          <button id="resetBtn" style="background:#ef4444;color:white">Reset</button>
+          <button id="copyBtn" class="btn btn-primary">Copy results</button>
+          <button id="resetBtn" class="btn btn-danger">Reset</button>
         </div>
       </div>
     </div>
@@ -179,12 +247,12 @@ winRange.addEventListener('input', (e)=>{ winVal.textContent = e.target.value; c
 
 copyBtn.addEventListener('click', ()=>{
   const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\ndegreesPerCount=${degPerCountEl.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
-  navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
+  navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
 });
 
-resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent='10'; lookup = defaultLookup.slice(); compute(); });
+resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent=winRange.value; lookup = defaultLookup.slice(); compute(); });
 
-winRange.value = '10'; winVal.textContent=''; mcSensInput.value=''; dpiInput.value=''; compute();
+winRange.value = '10'; winVal.textContent=winRange.value;; mcSensInput.value=''; dpiInput.value=''; compute();
 </script>
 </body>
 </html>
