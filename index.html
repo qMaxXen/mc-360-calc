@@ -3,325 +3,82 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minecraft 360 Calculator</title>
-  <meta name="description" content="A simple website to calculate your cm/360 (and in/360) for Minecraft.">
-  <style>
-    :root{--bg:#0f172a;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
-    html, body {  height: 100%;  min-height: 100%;  margin: 0;  font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial;  background: linear-gradient(180deg,#020617 0%, #07102a 100%);  background-attachment: fixed;}
-
-    body{background:linear-gradient(180deg,#020617 0%, #07102a 100%);color:#e6eef8;display:flex;align-items:flex-start;justify-content:center;padding:28px;overflow:auto}
-    html, body { scrollbar-width: none; -ms-overflow-style: none; }
-    body::-webkit-scrollbar { display: none; }
-
-    .card{background:var(--card);border-radius:12px;padding:20px;width:820px;max-width:96%;box-shadow:0 6px 30px rgba(2,6,23,0.6); position: relative;}
-    h1{margin:0 0 10px;font-size:20px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px}
-    #mcSens { width: calc(100% - 20px); }
-    .results{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
-    .result{flex:1 1 200px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px}
-    .small{font-size:12px;color:var(--muted)}
-
-    button, .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      line-height: 1;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      color: inherit;                      
-      background-color: rgba(255,255,255,0.02); 
-      border: 1px solid rgba(255,255,255,0.03);
-      box-shadow: none;                   
-      transition: none;                  
-    }
-
-    .btn-primary {
-      background-color: rgba(96,165,250,0.08);   
-      border-color: rgba(96,165,250,0.10);
-      color: inherit;
-    }
-
-
-    .btn-primary:hover {
-      background-color: rgba(96,165,250,0.12);     
-      border-color: rgba(96,165,250,0.14);
-    }
-
-    .btn-danger {
-      background-color: rgba(239,68,68,0.08);   
-      border-color: rgba(239,68,68,0.10);
-      color: inherit;
-    }
-
-    .btn-danger:hover {
-      background-color: rgba(239,68,68,0.14);
-      border-color: rgba(239,68,68,0.16);
-    }
-
-    .btn-ghost {
-      background-color: transparent;
-      color: inherit;
-      border: 1px solid rgba(255,255,255,0.03);
-    }
-
-    button:focus-visible {
-      outline: 2px solid rgba(96,165,250,0.12);
-      outline-offset: 2px;
-      border-radius: 10px;
-    }
-
-    button[disabled] { opacity: .6; cursor: not-allowed; }
-
-    .grid > div > .row-inline > button,
-    .grid > div > div[style] > button {
-      min-width: 96px;
-      justify-content: center;
-    }
-
-    .footer{margin-top:14px;font-size:13px;color:var(--muted)}
-    .muted{color:var(--muted)}
-    .row-inline{display:flex;gap:8px;align-items:center}
-    .slider-value{
-      min-width:40px;
-      text-align:center;
-      padding:4px 8px;                        
-      border-radius:6px;                      
-      background:rgba(255,255,255,0.04);      
-      border:1px solid rgba(255,255,255,0.03);
-      font-weight:600;
-    }
-    @media (max-width:640px){.grid{grid-template-columns:1fr}}
-    .dpi-buttons {
-      display: flex;
-      gap: 8px;          
-      align-items: center; 
-      flex-shrink: 0;
-    }
-
-    .dpi-adjust {
-      min-width: 0;      
-      width: 40px;         
-      height: 35px;
-      padding: 0;
-      display: inline-flex; 
-      justify-content: center;
-      align-items: center;
-
-      background: var(--glass);                        
-      border: 1px solid rgba(255,255,255,0.04);         
-      border-radius: 8px;                                
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 1;
-      color: inherit;
-
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
-      box-shadow: none;
-    }
-
-    .dpi-adjust:hover {
-      background-color: rgba(96,165,250,0.06);  
-      border-color: rgba(96,165,250,0.10);
-    }
-
-    .dpi-adjust:active {
-      background-color: rgba(96,165,250,0.12);
-      border-color: rgba(96,165,250,0.12);
-    }
-
-    .dpi-adjust:focus {
-      outline: none;
-    }
-    .dpi-adjust:focus-visible {
-      outline: 2px solid rgba(96,165,250,0.12);
-      outline-offset: 2px;
-      border-radius: 8px;
-    }
-
-  </style>
+  <title>Minecraft 360° Calculator</title>
+  <meta name="description" content="A simple website to calculate your cm/360 for Minecraft.">
+  <link rel="stylesheet" href="style.css?v=1.0.0" />
 </head>
 <body>
   <main class="card" role="main">
-    <h1>Minecraft 360 Calculator</h1>
-    <p class="small">Enter your <strong>Minecraft sens</strong> (from <code>options.txt</code>), <strong>DPI</strong>, and <strong>Windows Sens</strong>. The page calculates <em>in/360</em> and <em>cm/360</em>.</p>
+    <h1>Minecraft 360° Calculator</h1>
+    <p class="subtitle">Calculates how far your mouse needs to travel for a full 360° turn in-game.</p>
 
-    <div class="grid" style="margin-top:12px">
+    <div class="grid">
       <div>
-        <label for="mcSens">Minecraft sens (from options.txt)</label>
+        <label for="mcSens">Minecraft sensitivity (from options.txt)</label>
         <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
+        <div id="mcSensError" class="error-msg hidden">Must be between 0 and 1</div>
       </div>
 
       <div>
         <label for="dpi">DPI</label>
         <div class="row-inline">
-          <input id="dpi" inputmode="numeric" placeholder="e.g. 1000" style="flex: 1; min-width: 0;" />
-          <div class="dpi-buttons">
-            <button id="dpiMinus" class="btn btn-ghost dpi-adjust">−</button>
-            <button id="dpiPlus" class="btn btn-ghost dpi-adjust">+</button>
-          </div>
+          <input id="dpi" inputmode="numeric" placeholder="e.g. 1000" style="flex:1;min-width:0" />
+          <button id="dpiMinus" class="dpi-adjust">−</button>
+          <button id="dpiPlus"  class="dpi-adjust">+</button>
         </div>
       </div>
 
       <div>
-        <label for="winSens">Windows Sens (1–20)</label>
+        <label for="winSens">Windows sensitivity (1–20)</label>
         <div class="row-inline">
           <input id="winSens" type="range" min="1" max="20" value="10" />
-          <div class="slider-value small" id="winVal">10</div>
+          <span class="slider-value small" id="winVal">10</span>
         </div>
       </div>
 
       <div>
         <label>&nbsp;</label>
-        <div style="display:flex;gap:8px">
-          <button id="copyBtn" class="btn btn-primary">Copy results</button>
-          <button id="resetBtn" class="btn btn-danger">Reset</button>
+        <div class="btn-row">
+          <button id="copyBtn" class="btn-primary">Copy</button>
+          <button id="resetBtn" class="btn-danger">Reset</button>
         </div>
       </div>
     </div>
 
     <div class="results" id="results">
       <div class="result">
-        <div class="small">in / 360</div>
-        <div id="in360" style="font-size:20px;font-weight:600">—</div>
+        <div class="small muted">in / 360</div>
+        <div id="in360">—</div>
       </div>
-
       <div class="result">
-        <div class="small">cm / 360</div>
-        <div id="cm360" style="font-size:20px;font-weight:600">—</div>
+        <div class="small muted">cm / 360</div>
+        <div id="cm360">—</div>
       </div>
-
       <div class="result">
-        <div class="small">Minecraft percent</div>
-        <div id="mcPercent" style="font-size:18px;font-weight:600">—</div>
+        <div class="small muted">Minecraft %</div>
+        <div id="mcPercent">—</div>
       </div>
-
       <div class="result">
-        <div class="small">Degrees / count</div>
-        <div id="degPerCount" style="font-size:16px;font-weight:600">—</div>
+        <div class="small muted">Degrees / count</div>
+        <div id="degPerCount">—</div>
       </div>
-
       <div class="result">
-        <div class="small">Cursor sensitivity</div>
-        <div id="cursorSens" style="font-size:16px;font-weight:600">—</div>
+        <div class="small muted">Cursor sensitivity</div>
+        <div id="cursorSens">—</div>
       </div>
     </div>
 
-    <div class="footer">
-      <strong>Notes:</strong> The formulas implemented are:
-      <pre class="small muted" style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px">in/360 = TRUNC(360 / (degreesPerCount * DPI), 2)
-cm/360 = in/360 * 2.54
-mc percent = TRUNC((mcSens * 2) * 100, 0) + "%"
-degreesPerCount = (mcSens * 0.6 + 0.2)^3 * 1.2
-cursor sens = (lookup multiplier for Windows Sens) * DPI
+    <details class="notes">
+      <summary>Formulas</summary>
+      <pre class="small muted">degreesPerCount = (mcSens × 0.6 + 0.2)³ × 1.2
+cm/360  = TRUNC(360 / (degreesPerCount × DPI), 2) × 2.54
+mc %    = TRUNC(mcSens × 2 × 100, 0) + "%"
+cursor  = windowsMultiplier × DPI
 
-These formulas are made by r0hkx.</pre>
-    </div>
+Formulas by r0hkx.</pre>
+    </details>
   </main>
 
-<script>
-function safeNum(v){ if (v===null || v===undefined) return NaN; const s = String(v).trim(); if (s==='') return NaN; return Number(s); }
-function truncTo(n, d){ if (!isFinite(n)) return NaN; const p = Math.pow(10, d); return Math.trunc(n * p) / p; }
-
-const defaultLookup = [
-  null,
-  0.03125, // 1
-  0.0625,  // 2
-  0.125,   // 3
-  0.25,    // 4
-  0.375,   // 5
-  0.5,     // 6
-  0.625,   // 7
-  0.75,    // 8
-  0.875,   // 9
-  1,       // 10
-  1.25,    // 11
-  1.5,     // 12
-  1.75,    // 13
-  2,       // 14
-  2.25,    // 15
-  2.5,     // 16
-  2.75,    // 17
-  3,       // 18
-  3.25,    // 19
-  3.5      // 20
-];
-let lookup = defaultLookup.slice();
-
-const mcSensInput = document.getElementById('mcSens');
-const dpiInput = document.getElementById('dpi');
-const winRange = document.getElementById('winSens');
-const winVal = document.getElementById('winVal');
-const in360El = document.getElementById('in360');
-const cm360El = document.getElementById('cm360');
-const degPerCountEl = document.getElementById('degPerCount');
-const mcPercEl = document.getElementById('mcPercent');
-const cursorEl = document.getElementById('cursorSens');
-const copyBtn = document.getElementById('copyBtn');
-const resetBtn = document.getElementById('resetBtn');
-
-function compute(){
-  const mc = safeNum(mcSensInput.value);
-  const dpi = safeNum(dpiInput.value);
-  const win = safeNum(winRange.value);
-
-  if (!isFinite(mc) || !isFinite(dpi)){
-    in360El.textContent = '—'; cm360El.textContent = '—'; degPerCountEl.textContent = '—'; mcPercEl.textContent = '—'; cursorEl.textContent = '—';
-    return;
-  }
-
-  const degreesPerCount = Math.pow(mc * 0.6 + 0.2, 3) * 1.2;
-  const countsPer360 = 360 / (degreesPerCount * dpi);
-  const in360 = truncTo(countsPer360, 2);
-  const cm360 = truncTo(countsPer360 * 2.54, 2);
-
-  in360El.textContent = isFinite(in360) ? in360.toFixed(2) : '—';
-  cm360El.textContent = isFinite(cm360) ? cm360.toFixed(2) : '—';
-  degPerCountEl.textContent = isFinite(degreesPerCount) ? truncTo(degreesPerCount, 6).toFixed(6) : '—';
-
-  mcPercEl.textContent = (isFinite(mc) ? (Math.trunc((mc * 2) * 100) + '%') : '—');
-
-  let multiplier = NaN;
-  if (isFinite(win) && Number.isInteger(win) && win >= 1 && win <= 20){
-    multiplier = lookup[win];
-  }
-  const cursorVal = isFinite(multiplier) && isFinite(dpi) ? multiplier * dpi : NaN;
-  cursorEl.textContent = isFinite(cursorVal) ? Math.round(cursorVal).toString() : '—';
-}
-
-mcSensInput.addEventListener('input', compute);
-dpiInput.addEventListener('input', compute);
-winRange.addEventListener('input', (e)=>{ winVal.textContent = e.target.value; compute(); });
-
-document.getElementById('dpiMinus').addEventListener('click', () => {
-  const current = safeNum(dpiInput.value);
-  const newVal = isFinite(current) ? Math.max(100, current - 100) : 900;
-  dpiInput.value = newVal;
-  compute();
-});
-
-document.getElementById('dpiPlus').addEventListener('click', () => {
-  const current = safeNum(dpiInput.value);
-  const newVal = isFinite(current) ? current + 100 : 1100;
-  dpiInput.value = newVal;
-  compute();
-});
-
-copyBtn.addEventListener('click', ()=>{
-  const text = `mcSens=${mcSensInput.value || ''}\nDPI=${dpiInput.value || ''}\nWindowsSens=${winRange.value || ''}\nin/360=${in360El.textContent}\ncm/360=${cm360El.textContent}\ndegreesPerCount=${degPerCountEl.textContent}\nmc%=${mcPercEl.textContent}\ncursorSens=${cursorEl.textContent}`;
-  navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy results',900); });
-});
-
-resetBtn.addEventListener('click', ()=>{ mcSensInput.value=''; dpiInput.value=''; winRange.value='10'; winVal.textContent=winRange.value; lookup = defaultLookup.slice(); compute(); });
-
-winRange.value = '10'; winVal.textContent=winRange.value; mcSensInput.value=''; dpiInput.value=''; compute();
-</script>
+  <script src="calc.js?v=1.0.0"></script>
 </body>
 </html>
