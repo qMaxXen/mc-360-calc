@@ -197,6 +197,14 @@ function compute() {
   cursorEl.textContent = isFinite(cursorSpeed)  ? Math.round(cursorSpeed).toString() : '—';
 }
 
+const card = document.querySelector('.card');
+requestAnimationFrame(() => {
+  const top = card.getBoundingClientRect().top + window.scrollY;
+  card.style.marginTop = top + 'px';
+  document.body.style.alignItems = 'flex-start';
+  document.body.style.paddingTop = '0';
+});
+
 mcSensInput.addEventListener('input', compute);
 dpiInput.addEventListener('input', compute);
 resolutionInput.addEventListener('input', compute);
