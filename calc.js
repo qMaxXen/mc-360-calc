@@ -235,19 +235,20 @@ document.getElementById('dpiPlus').addEventListener('click', () => {
 let copyResetPending = false;
 
 copyBtn.addEventListener('click', () => {
+  const na = 'n/a';
   const text = [
-    `mcSens=${mcSensInput.value || ''}`,
-    `DPI=${dpiInput.value || ''}`,
+    `mcSens=${mcSensInput.value || na}`,
+    `DPI=${dpiInput.value || na}`,
     `OS=${osSelect.value}`,
     `RawInput=${rawInputSelect.value}`,
-    `OSSens=${osSensVal.textContent}`,
-    `Resolution=${resolutionInput.value || ''}`,
-    `DisplayScaling=${scalingInput.value || ''}`,
-    `ToolSens=${toolSensInput.value || ''}`,
-    `cm/360=${cm360El.textContent}`,
-    `eDPI=${edpiEl.textContent}`,
-    `mc%=${mcPercEl.textContent}`,
-    `cursorSens=${cursorEl.textContent}`
+    `OSSens=${osSelect.value === 'linux' ? (linuxSens.value || na) : osSensVal.textContent}`,
+    `Resolution=${resolutionInput.value || na}`,
+    `DisplayScaling=${scalingInput.value || na}`,
+    `ToolSens=${toolSensInput.value || na}`,
+    `cm/360=${cm360El.textContent === '—' ? na : cm360El.textContent}`,
+    `eDPI=${edpiEl.textContent === '—' ? na : edpiEl.textContent}`,
+    `mc%=${mcPercEl.textContent === '—' ? na : mcPercEl.textContent}`,
+    `cursorSpeed=${cursorEl.textContent === '—' ? na : cursorEl.textContent}`
   ].join('\n');
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
