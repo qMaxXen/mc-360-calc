@@ -232,6 +232,8 @@ document.getElementById('dpiPlus').addEventListener('click', () => {
   compute();
 });
 
+let copyResetPending = false;
+
 copyBtn.addEventListener('click', () => {
   const text = [
     `mcSens=${mcSensInput.value || ''}`,
@@ -250,8 +252,17 @@ copyBtn.addEventListener('click', () => {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
       copyBtn.textContent = 'Copied!';
-      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 900);
+      copyResetPending = true;
     });
+  }
+});
+
+copyBtn.addEventListener('mouseleave', () => {
+  if (copyResetPending) {
+    copyResetPending = false;
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy';
+    }, 750);
   }
 });
 
