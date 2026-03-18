@@ -111,6 +111,17 @@ select {
   cursor: pointer;
 }
 
+option {
+  background-color: #1c1f25;
+  color: snow;
+}
+
+option:hover,
+option:focus,
+option:checked {
+  background-color: #2a2d35;
+}
+
 select:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.45);
