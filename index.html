@@ -29,15 +29,46 @@
       </div>
 
       <div>
-        <label for="winSens">Windows sensitivity (1–20)</label>
-        <div class="row-inline">
-          <input id="winSens" type="range" min="1" max="20" value="10" />
-          <span class="slider-value small" id="winVal">10</span>
-        </div>
+        <label for="osSelect">OS</label>
+        <select id="osSelect">
+          <option value="windows">Windows</option>
+          <option value="linux">Linux</option>
+        </select>
       </div>
 
       <div>
-        <label>&nbsp;</label>
+        <label for="rawInput">Raw input</label>
+        <select id="rawInput">
+          <option value="on">On</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="osSens" id="osSensLabel">Windows cursor speed (1 to 20)</label>
+        <div class="row-inline" id="osSensSliderRow">
+          <input id="osSens" type="range" min="1" max="20" value="10" step="1" />
+          <span class="slider-value small" id="osSensVal">10</span>
+        </div>
+        <input id="linuxSens" type="text" inputmode="decimal" placeholder="e.g. 0.0" class="hidden" />
+      </div>
+
+      <div>
+        <label for="resolution">Resolution (e.g. 1920x1080)</label>
+        <input id="resolution" inputmode="text" placeholder="e.g. 1920x1080" />
+      </div>
+
+      <div>
+        <label for="displayScaling">Display scaling (%)</label>
+        <input id="displayScaling" inputmode="numeric" placeholder="e.g. 100%" />
+      </div>
+
+      <div id="toolSensWrapper">
+        <label for="toolSens" id="toolSensLabel">Toolscreen sensitivity (optional)</label>
+        <input id="toolSens" inputmode="decimal" placeholder="e.g. 1.0" />
+      </div>
+
+      <div>
         <div class="btn-row">
           <button id="copyBtn" class="btn-primary">Copy</button>
           <button id="resetBtn" class="btn-danger">Reset</button>
@@ -47,35 +78,26 @@
 
     <div class="results" id="results">
       <div class="result">
-        <div class="small muted">in / 360</div>
-        <div id="in360">—</div>
-      </div>
-      <div class="result">
         <div class="small muted">cm / 360</div>
         <div id="cm360">—</div>
+      </div>
+      <div class="result">
+        <div class="small muted">eDPI</div>
+        <div id="edpi">—</div>
       </div>
       <div class="result">
         <div class="small muted">Minecraft %</div>
         <div id="mcPercent">—</div>
       </div>
       <div class="result">
-        <div class="small muted">Degrees / count</div>
-        <div id="degPerCount">—</div>
-      </div>
-      <div class="result">
-        <div class="small muted">Cursor sensitivity</div>
+        <div class="small muted">Cursor speed</div>
         <div id="cursorSens">—</div>
       </div>
     </div>
 
     <details class="notes">
-      <summary>Formulas</summary>
-      <pre class="small muted">degreesPerCount = (mcSens × 0.6 + 0.2)³ × 1.2
-cm/360  = TRUNC(360 / (degreesPerCount × DPI), 2) × 2.54
-mc %    = TRUNC(mcSens × 2 × 100, 0) + "%"
-cursor  = windowsMultiplier × DPI
-
-Formulas by r0hkx.</pre>
+      <summary>Credits</summary>
+      <p class="small muted" style="margin:0;padding:10px 14px;border-top:1px solid var(--border)">Formulas used by this calculator are from the <a href="https://docs.google.com/spreadsheets/d/1aa_ZRy1Dd3Fj4eEzPABY0hHEpCsQTZdYKWSwc7zaoVI" target="_blank">MCSR Community Settings</a> spreadsheet. Credits to r0hkx and luvvlyjude.</p>
     </details>
   </main>
 
