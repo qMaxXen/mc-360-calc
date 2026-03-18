@@ -93,10 +93,15 @@ input, select {
   outline: none;
 }
 
-input:not([type="range"]):focus,
-select:focus {
+input:not([type="range"]):focus {
   border-color: rgba(255, 255, 255, 0.45);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--border);
+  box-shadow: none;
 }
 
 input[type="range"] { border: none; padding: 0; cursor: pointer; }
@@ -122,16 +127,16 @@ option:checked {
   background-color: #2a2d35;
 }
 
-select:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
-}
-
 .slider-value {
-  min-width: 28px;
-  text-align: center;
+  width: 32px;
   font-family: Consolas, monaco, monospace;
+  padding: 4px 0;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  color: snow;
 }
 
 button {
