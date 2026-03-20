@@ -196,7 +196,7 @@ button:hover { border-color: rgba(255, 255, 255, 0.6); background-color: rgba(25
 }
 
 .result {
-  flex: 1 1 160px;
+  flex: 1 1 0;
   padding: 10px 14px;
   border-right: 1px solid var(--border);
   border-top: 1px solid var(--border);
