@@ -167,9 +167,15 @@ function compute() {
     mcSensInput.classList.remove('input-error');
   }
 
+  if (isFinite(mc) && mc >= 0 && mc <= 1) {
+    mcPercEl.textContent = Math.trunc(mc * 2 * 100) + '%';
+    mcPercEl.classList.remove('hidden');
+  } else {
+    mcPercEl.classList.add('hidden');
+  }
+
   if (!isFinite(mc) || !isFinite(dpi) || mc < 0 || mc > 1) {
     cm360El.textContent    = '—';
-    mcPercEl.textContent   = '—';
     cursorEl.textContent   = '—';
     return;
   }
@@ -182,15 +188,12 @@ function compute() {
 
   const cm360 = getRotationSens(edpi, mc);
 
-  const mcPercent = isFinite(mc) ? (Math.trunc(mc * 2 * 100) + '%') : '—';
-
   let cursorSpeed = NaN;
   if (isFinite(speedFactor) && isFinite(scalingFactor) && isFinite(dpi)) {
     cursorSpeed = speedFactor * scalingFactor * dpi;
   }
 
   cm360El.textContent  = isFinite(cm360)       ? cm360.toFixed(2)              : '—';
-  mcPercEl.textContent = mcPercent;
   cursorEl.textContent = isFinite(cursorSpeed)  ? Math.round(cursorSpeed).toString() : '—';
 }
 
@@ -251,7 +254,7 @@ copyBtn.addEventListener('click', () => {
     `DisplayScaling=${scalingInput.value || na}`,
     `ToolSens=${toolSensInput.value || na}`,
     `cm/360=${cm360El.textContent === '—' ? na : cm360El.textContent}`,
-    `mc%=${mcPercEl.textContent === '—' ? na : mcPercEl.textContent}`,
+    `mc%=${mcPercEl.textContent || na}`,
     `cursorSpeed=${cursorEl.textContent === '—' ? na : cursorEl.textContent}`
   ].join('\n');
   if (navigator.clipboard) {
@@ -282,6 +285,7 @@ resetBtn.addEventListener('click', () => {
   linuxSens.value        = '';
   osSens.value           = 10;
   osSensVal.textContent  = '10';
+  mcPercEl.classList.add('hidden');
   mcSensError.classList.add('hidden');
   mcSensInput.classList.remove('input-error');
   updateOSUI();

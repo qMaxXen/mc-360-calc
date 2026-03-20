@@ -67,6 +67,28 @@ a { color: var(--link); }
   align-items: center;
 }
 
+.input-suffix-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.input-suffix-wrap input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.input-suffix {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: Consolas, monaco, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  pointer-events: none;
+  user-select: none;
+}
+
 .btn-row {
   display: flex;
   gap: 8px;

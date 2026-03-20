@@ -15,7 +15,10 @@
     <div class="grid">
       <div>
         <label for="mcSens">Minecraft sensitivity (from options.txt)</label>
-        <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
+        <div class="input-suffix-wrap">
+          <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
+          <span id="mcPercent" class="input-suffix hidden"></span>
+        </div>
         <div id="mcSensError" class="error-msg hidden">Must be between 0 and 1</div>
       </div>
 
@@ -80,10 +83,6 @@
       <div class="result">
         <div class="small muted">cm / 360</div>
         <div id="cm360">—</div>
-      </div>
-      <div class="result">
-        <div class="small muted">Minecraft %</div>
-        <div id="mcPercent">—</div>
       </div>
       <div class="result">
         <div class="small muted">Cursor speed</div>
