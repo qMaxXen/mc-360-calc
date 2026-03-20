@@ -50,7 +50,6 @@ const scalingInput    = document.getElementById('displayScaling');
 const toolSensInput   = document.getElementById('toolSens');
 const toolSensLabel   = document.getElementById('toolSensLabel');
 const cm360El         = document.getElementById('cm360');
-const edpiEl          = document.getElementById('edpi');
 const mcPercEl        = document.getElementById('mcPercent');
 const cursorEl        = document.getElementById('cursorSens');
 const copyBtn         = document.getElementById('copyBtn');
@@ -170,7 +169,6 @@ function compute() {
 
   if (!isFinite(mc) || !isFinite(dpi) || mc < 0 || mc > 1) {
     cm360El.textContent    = '—';
-    edpiEl.textContent     = '—';
     mcPercEl.textContent   = '—';
     cursorEl.textContent   = '—';
     return;
@@ -192,7 +190,6 @@ function compute() {
   }
 
   cm360El.textContent  = isFinite(cm360)       ? cm360.toFixed(2)              : '—';
-  edpiEl.textContent   = isFinite(edpi)         ? Math.round(edpi).toString()   : '—';
   mcPercEl.textContent = mcPercent;
   cursorEl.textContent = isFinite(cursorSpeed)  ? Math.round(cursorSpeed).toString() : '—';
 }
@@ -254,7 +251,6 @@ copyBtn.addEventListener('click', () => {
     `DisplayScaling=${scalingInput.value || na}`,
     `ToolSens=${toolSensInput.value || na}`,
     `cm/360=${cm360El.textContent === '—' ? na : cm360El.textContent}`,
-    `eDPI=${edpiEl.textContent === '—' ? na : edpiEl.textContent}`,
     `mc%=${mcPercEl.textContent === '—' ? na : mcPercEl.textContent}`,
     `cursorSpeed=${cursorEl.textContent === '—' ? na : cursorEl.textContent}`
   ].join('\n');
