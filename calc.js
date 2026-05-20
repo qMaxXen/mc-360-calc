@@ -136,15 +136,21 @@ function getToolFactor() {
 
 function getEdpi(dpi, speedFactor, scalingFactor, toolFactor, rawOn) {
   if (!isFinite(dpi)) return NaN;
+  const isLinux = osSelect.value === 'linux';
   if (rawOn) {
-    const isLinux = osSelect.value === 'linux';
     if (toolFactor === null) return dpi;
     if (isLinux) return dpi;
     return dpi * toolFactor;
   } else {
-    if (!isFinite(scalingFactor) || !isFinite(speedFactor)) return NaN;
-    if (toolFactor === null) return dpi * scalingFactor * speedFactor;
-    return dpi * scalingFactor * speedFactor * toolFactor;
+    if (!isFinite(speedFactor)) return NaN;
+    if (isLinux) {
+      if (toolFactor === null) return dpi * speedFactor;
+      return dpi * speedFactor * toolFactor;
+    } else {
+      if (!isFinite(scalingFactor)) return NaN;
+      if (toolFactor === null) return dpi * scalingFactor * speedFactor;
+      return dpi * scalingFactor * speedFactor * toolFactor;
+    }
   }
 }
 
