@@ -1,101 +1,91 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minecraft 360° Calculator</title>
-  <meta name="description" content="A website to calculate your cm/360 for Minecraft.">
-  <link rel="stylesheet" href="style.css?v=1.0.6" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Minecraft 360° Calculator</title>
+    <meta name="description" content="A website to calculate your cm/360 for Minecraft.">
+    <link rel="stylesheet" href="font/roboto-mono.css">
+    <link rel="stylesheet" href="font/mojangles.css">
+    <link rel="stylesheet" href="style.css?v=1.0.9" />
 </head>
 <body>
-  <main class="card" role="main">
-    <h1>Minecraft 360° Calculator</h1>
-    <p class="subtitle">Calculates how far your mouse needs to travel for a full 360° turn in-game.</p>
-
-    <div class="grid">
-      <div>
-        <label for="mcSens">Minecraft sensitivity (from options.txt)</label>
-        <div class="input-suffix-wrap">
-          <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
-          <span id="mcPercent" class="input-suffix hidden"></span>
+    <main class="main-container" role="main">
+        <h1>Minecraft 360° Calculator</h1>
+        <p class="subtitle">Calculates how far your mouse needs to travel for a full 360° turn in-game.</p>
+        <div class="grid">
+            <div>
+                <label for="mcSens">Minecraft sensitivity (from options.txt)</label>
+                <div class="mc-sens-percent-wrap">
+                    <input id="mcSens" inputmode="decimal" placeholder="e.g. 0.5" />
+                    <span id="mcSensPercent" class="mc-sens-percent hidden"></span>
+                </div>
+                <div id="mcSensError" class="error-msg hidden">Must be between 0 and 1</div>
+            </div>
+            <div>
+                <label for="dpi">DPI</label>
+                <div class="row-inline">
+                    <input id="dpi" inputmode="numeric" placeholder="e.g. 1000" class="dpi-input" />
+                    <button id="dpiMinus" class="dpi-adjust">−</button>
+                    <button id="dpiPlus" class="dpi-adjust">+</button>
+                </div>
+            </div>
+            <div>
+                <label for="osSelect">Operating system</label>
+                <select id="osSelect">
+                    <option value="windows">Windows</option>
+                    <option value="linux">Linux</option>
+                </select>
+            </div>
+            <div>
+                <label for="rawInput">Raw input</label>
+                <select id="rawInput">
+                    <option value="on">On</option>
+                    <option value="off">Off</option>
+                </select>
+            </div>
+            <div>
+                <label for="osSens" id="osSensLabel">Windows cursor speed (1 to 20)</label>
+                <div class="row-inline" id="osSensSliderRow">
+                    <input id="osSens" type="range" min="1" max="20" value="10" step="1" />
+                    <span class="slider-value small" id="osSensVal">10</span>
+                </div>
+                <input id="linuxSens" type="text" inputmode="decimal" placeholder="e.g. 0.0" class="hidden" />
+            </div>
+            <div>
+                <label for="resolution">Resolution</label>
+                <input id="resolution" inputmode="text" placeholder="e.g. 1920x1080" />
+            </div>
+            <div>
+                <label for="displayScaling">Display scaling (%)</label>
+                <input id="displayScaling" inputmode="numeric" placeholder="e.g. 100%" />
+            </div>
+            <div id="toolscreenSensWrapper">
+                <label for="toolscreenSens" id="toolscreenSensLabel">Toolscreen sensitivity (optional)</label>
+                <input id="toolscreenSens" inputmode="decimal" placeholder="e.g. 1.0" />
+            </div>
+            <div>
+                <div class="btn-row">
+                    <button id="copyBtn" class="btn-copy">Copy</button>
+                    <button id="resetBtn" class="btn-reset">Reset</button>
+                </div>
+            </div>
         </div>
-        <div id="mcSensError" class="error-msg hidden">Must be between 0 and 1</div>
-      </div>
-
-      <div>
-        <label for="dpi">DPI</label>
-        <div class="row-inline">
-          <input id="dpi" inputmode="numeric" placeholder="e.g. 1000" style="flex:1;min-width:0" />
-          <button id="dpiMinus" class="dpi-adjust">−</button>
-          <button id="dpiPlus"  class="dpi-adjust">+</button>
+        <div class="results-grid" id="results">
+            <div class="results-item">
+                <div class="small text-dim">cm / 360</div>
+                <div id="cm360">-</div>
+            </div>
+            <div class="results-item">
+                <div class="small text-dim">Cursor speed</div>
+                <div id="cursorSens">-</div>
+            </div>
         </div>
-      </div>
-
-      <div>
-        <label for="osSelect">OS</label>
-        <select id="osSelect">
-          <option value="windows">Windows</option>
-          <option value="linux">Linux</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="rawInput">Raw input</label>
-        <select id="rawInput">
-          <option value="on">On</option>
-          <option value="off">Off</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="osSens" id="osSensLabel">Windows cursor speed (1 to 20)</label>
-        <div class="row-inline" id="osSensSliderRow">
-          <input id="osSens" type="range" min="1" max="20" value="10" step="1" />
-          <span class="slider-value small" id="osSensVal">10</span>
-        </div>
-        <input id="linuxSens" type="text" inputmode="decimal" placeholder="e.g. 0.0" class="hidden" />
-      </div>
-
-      <div>
-        <label for="resolution">Resolution</label>
-        <input id="resolution" inputmode="text" placeholder="e.g. 1920x1080" />
-      </div>
-
-      <div>
-        <label for="displayScaling">Display scaling (%)</label>
-        <input id="displayScaling" inputmode="numeric" placeholder="e.g. 100%" />
-      </div>
-
-      <div id="toolSensWrapper">
-        <label for="toolSens" id="toolSensLabel">Toolscreen sensitivity (optional)</label>
-        <input id="toolSens" inputmode="decimal" placeholder="e.g. 1.0" />
-      </div>
-
-      <div>
-        <div class="btn-row">
-          <button id="copyBtn" class="btn-primary">Copy</button>
-          <button id="resetBtn" class="btn-danger">Reset</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="results" id="results">
-      <div class="result">
-        <div class="small muted">cm / 360</div>
-        <div id="cm360">—</div>
-      </div>
-      <div class="result">
-        <div class="small muted">Cursor speed</div>
-        <div id="cursorSens">—</div>
-      </div>
-    </div>
-
-    <details class="notes">
-      <summary>Credits</summary>
-      <p class="small muted" style="margin:0;padding:10px 14px;border-top:1px solid var(--border)">Formulas used by this calculator are from the <a href="https://docs.google.com/spreadsheets/d/1aa_ZRy1Dd3Fj4eEzPABY0hHEpCsQTZdYKWSwc7zaoVI" target="_blank">MCSR Community Settings</a> spreadsheet. Credits to r0hkx and luvvlyjude.</p>
-    </details>
-  </main>
-
-  <script src="calc.js?v=1.0.6"></script>
+        <details class="credits">
+            <summary>Credits</summary>
+            <p class="small credits-text">Formulas used by this calculator are from the <a href="https://docs.google.com/spreadsheets/d/1aa_ZRy1Dd3Fj4eEzPABY0hHEpCsQTZdYKWSwc7zaoVI" target="_blank">MCSR Community Settings</a> spreadsheet. Credits to r0hkx and luvvlyjude.</p>
+        </details>
+    </main>
+    <script src="calc.js?v=1.0.7"></script>
 </body>
 </html>
